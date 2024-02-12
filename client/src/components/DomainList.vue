@@ -63,9 +63,11 @@ export default {
     domains() {
       console.log("Generating domains...");
       const domains = [];
+      console.table(this.prefixes);
+      console.table(this.suffixes);
       for (const prefix of this.prefixes) {
         for (const suffix of this.suffixes) {
-          const name = prefix + suffix;
+          const name = prefix.description + suffix.description;
           const url = name.toLowerCase();
           const checkout = `https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
           domains.push({
@@ -78,39 +80,103 @@ export default {
     },
   },
   created() {
-    axios({
-      url: "http://localhost:4000",
-      method: "post",
-      data: {
-        query: `
-        {
+    this.getPrefixes();
+    this.getSuffixes();
+  },
+  methods: {
+    getPrefixes() {
+      axios({
+        url: "http://localhost:4000",
+        method: "post",
+        data: {
+          query: `{
           prefixes: items (type: "prefix") {
             id
             type
             description
           }
-          suffixes: items (type: "suffix") {
-            description
-          }
-        }
-        `,
-      },
-    }).then((response) => {
-      const query = response.data;
-      console.log(query.data);
-      this.prefixes = query.data.prefixes.map((item) => item.description);
-      this.suffixes = query.data.suffixes.map((item) => item.description);
-    });
-  },
-  methods: {
+        }`,
+        },
+      }).then((response) => {
+        const query = response.data;
+        this.prefixes = query.data.prefixes;
+      });
+    },
     addPrefix(prefix) {
-      this.prefixes.push(prefix);
+      axios({
+        url: "http://localhost:4000",
+        method: "post",
+        data: {
+          query: `
+          mutation ($item: ItemInput) {
+            saveItem(item: $item) {
+              id
+              type
+              description
+            }
+          }
+        `,
+          variables: {
+            item: {
+              type: "prefix",
+              description: prefix,
+            },
+          },
+        },
+      }).then((response) => {
+        const query = response.data;
+        const { saveItem } = query.data;
+        console.log(saveItem);
+        this.prefixes.push(saveItem);
+      });
     },
     deletePrefix(prefix) {
       this.prefixes.splice(this.prefixes.indexOf(prefix), 1);
     },
+    getSuffixes() {
+      axios({
+        url: "http://localhost:4000",
+        method: "post",
+        data: {
+          query: `{
+          suffixes: items (type: "suffix") {
+            description,
+            id
+            type
+          }
+        }`,
+        },
+      }).then((response) => {
+        const query = response.data;
+        this.suffixes = query.data.suffixes;
+      });
+    },
     addSuffix(suffix) {
-      this.suffixes.push(suffix);
+      axios({
+        url: "http://localhost:4000",
+        method: "post",
+        data: {
+          query: `
+          mutation ($item: ItemInput) {
+            saveItem(item: $item) {
+              id
+              type
+              description
+            }
+          }
+        `,
+          variables: {
+            item: {
+              type: "suffix",
+              description: suffix,
+            },
+          },
+        },
+      }).then((response) => {
+        const query = response.data;
+        const { saveItem } = query.data;
+        this.suffixes.push(saveItem);
+      });
     },
     deleteSuffix(suffix) {
       this.suffixes.splice(this.suffixes.indexOf(suffix), 1);

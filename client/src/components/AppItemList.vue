@@ -9,10 +9,10 @@
         <ul class="list-group">
           <li
             v-for="i in items"
-            :key="i"
+            :key="i.id"
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            <div>{{ i }}</div>
+            <div>{{ i.description }}</div>
             <button class="btn btn-info" @click="deleteItem(i)">
               <span class="fa fa-trash"></span>
             </button>
