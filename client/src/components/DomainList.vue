@@ -5,17 +5,19 @@
         <div class="col-md">
           <AppItemList
             title="Prefixos"
-            :items="prefixes"
-            @add-item="addPrefix"
-            @delete-item="deletePrefix"
+            type="prefix"
+            :items="items.prefix"
+            @add-item="addItem"
+            @delete-item="deleteItem"
           />
         </div>
         <div class="col-md">
           <AppItemList
             title="Sufixos"
-            :items="suffixes"
-            @add-item="addSuffix"
-            @delete-item="deleteSuffix"
+            type="suffix"
+            :items="items.suffix"
+            @add-item="addItem"
+            @delete-item="deleteItem"
           />
         </div>
       </div>
@@ -55,18 +57,18 @@ export default {
   },
   data() {
     return {
-      prefixes: [],
-      suffixes: [],
+      items: {
+        prefix: [],
+        suffix: [],
+      },
     };
   },
   computed: {
     domains() {
       console.log("Generating domains...");
       const domains = [];
-      console.table(this.prefixes);
-      console.table(this.suffixes);
-      for (const prefix of this.prefixes) {
-        for (const suffix of this.suffixes) {
+      for (const prefix of this.items.prefix) {
+        for (const suffix of this.items.suffix) {
           const name = prefix.description + suffix.description;
           const url = name.toLowerCase();
           const checkout = `https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
@@ -80,29 +82,32 @@ export default {
     },
   },
   created() {
-    this.getPrefixes();
-    this.getSuffixes();
+    this.getItems("prefix");
+    this.getItems("suffix");
   },
   methods: {
-    getPrefixes() {
+    getItems(type) {
       axios({
         url: "http://localhost:4000",
         method: "post",
         data: {
-          query: `{
-          prefixes: items (type: "prefix") {
+          query: ` query ($type: String){
+           items (type: $type) {
             id
             type
             description
           }
         }`,
+          variables: {
+            type,
+          },
         },
       }).then((response) => {
         const query = response.data;
-        this.prefixes = query.data.prefixes;
+        this.items[type] = query.data.items;
       });
     },
-    addPrefix(prefix) {
+    addItem(item) {
       axios({
         url: "http://localhost:4000",
         method: "post",
@@ -117,69 +122,33 @@ export default {
           }
         `,
           variables: {
-            item: {
-              type: "prefix",
-              description: prefix,
-            },
+            item,
           },
         },
       }).then((response) => {
         const query = response.data;
         const { saveItem } = query.data;
         console.log(saveItem);
-        this.prefixes.push(saveItem);
+        this.items[saveItem.type].push(saveItem);
       });
     },
-    deletePrefix(prefix) {
-      this.prefixes.splice(this.prefixes.indexOf(prefix), 1);
-    },
-    getSuffixes() {
-      axios({
-        url: "http://localhost:4000",
-        method: "post",
-        data: {
-          query: `{
-          suffixes: items (type: "suffix") {
-            description,
-            id
-            type
-          }
-        }`,
-        },
-      }).then((response) => {
-        const query = response.data;
-        this.suffixes = query.data.suffixes;
-      });
-    },
-    addSuffix(suffix) {
+    deleteItem(item) {
       axios({
         url: "http://localhost:4000",
         method: "post",
         data: {
           query: `
-          mutation ($item: ItemInput) {
-            saveItem(item: $item) {
-              id
-              type
-              description
-            }
+          mutation ($id: Int) {
+            deleted: deleteItem(id: $id)
           }
         `,
           variables: {
-            item: {
-              type: "suffix",
-              description: suffix,
-            },
+            id: item.id,
           },
         },
-      }).then((response) => {
-        const query = response.data;
-        const { saveItem } = query.data;
-        this.suffixes.push(saveItem);
+      }).then(() => {
+        this.getItems(item.type);
       });
-    },
-    deleteSuffix(suffix) {
-      this.suffixes.splice(this.suffixes.indexOf(suffix), 1);
     },
   },
 };

@@ -20,13 +20,17 @@
         </ul>
         <div class="input-group mt-3">
           <input
-            v-model="item"
+            v-model="description"
             class="form-control"
             type="text"
             placeholder="Digite o prefixo"
-            @keyup.enter="addItem(item)"
+            @keyup.enter="addItem(type, description)"
           />
-          <button class="btn btn-info" type="button" @click="addItem(item)">
+          <button
+            class="btn btn-info"
+            type="button"
+            @click="addItem(type, description)"
+          >
             <span class="fa fa-plus"></span>
           </button>
         </div>
@@ -39,6 +43,10 @@
 export default {
   name: "AppItemList",
   props: {
+    type: {
+      type: String,
+      default: "",
+    },
     title: {
       type: String,
       default: "",
@@ -51,13 +59,17 @@ export default {
   emits: ["addItem", "deleteItem"],
   data() {
     return {
-      item: "",
+      description: "",
     };
   },
   methods: {
-    addItem(item) {
-      this.$emit("addItem", item);
-      this.item = "";
+    addItem(type, description) {
+      this.$emit("addItem", {
+        type,
+        description,
+      });
+
+      this.description = "";
     },
     deleteItem(item) {
       this.$emit("deleteItem", item);
