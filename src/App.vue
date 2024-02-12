@@ -16,12 +16,12 @@
               <div class="card-body">
                 <ul class="list-group">
                   <li
-                    v-for="prefix in prefixes"
-                    :key="prefix"
+                    v-for="item in prefixes"
+                    :key="item"
                     class="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    <div>{{ prefix }}</div>
-                    <button class="btn btn-info" @click="deletePrefix(sufix)">
+                    <div>{{ item }}</div>
+                    <button class="btn btn-info" @click="deletePrefix(item)">
                       <span class="fa fa-trash"></span>
                     </button>
                   </li>
@@ -54,12 +54,12 @@
               <div class="card-body">
                 <ul class="list-group">
                   <li
-                    v-for="suffix in suffixes"
-                    :key="suffix"
+                    v-for="item in suffixes"
+                    :key="item"
                     class="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    <div>{{ suffix }}</div>
-                    <button class="btn btn-info" @click="deleteSuffix(suffix)">
+                    <div>{{ item }}</div>
+                    <button class="btn btn-info" @click="deleteSuffix(item)">
                       <span class="fa fa-trash"></span>
                     </button>
                   </li>
@@ -86,17 +86,21 @@
         </div>
         <br />
         <h5>
-          Domínios <span class="badge text-bg-info">{{ domains.length }}</span>
+          Domínios
+          <span class="badge text-bg-info">{{ domains.length }}</span>
         </h5>
         <div class="card">
           <div class="card-body">
             <ul class="list-group">
               <li
                 v-for="domain in domains"
-                :key="domain"
-                class="list-group-item"
+                :key="domain.name"
+                class="list-group-item d-flex justify-content-between align-items-center"
               >
-                {{ domain }}
+                <div>{{ domain.name }}</div>
+                <a class="btn btn-info" :href="domain.checkout" target="_blank">
+                  <i class="fa fa-shopping-cart"></i>
+                </a>
               </li>
             </ul>
           </div>
@@ -112,44 +116,46 @@ import "font-awesome/css/font-awesome.min.css";
 
 export default {
   name: "App",
-  data: function () {
+  data() {
     return {
       prefix: "",
       prefixes: ["Air", "Jet", "Flight"],
       suffix: "",
       suffixes: ["Hub", "Station", "Mart"],
-      domains: [],
     };
   },
-  beforeMount() {
-    this.generate();
+  computed: {
+    domains() {
+      console.log("Generating domains...");
+      const domains = [];
+      for (const prefix of this.prefixes) {
+        for (const suffix of this.suffixes) {
+          const name = prefix + suffix;
+          const url = name.toLowerCase();
+          const checkout = `https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
+          domains.push({
+            name,
+            checkout,
+          });
+        }
+      }
+      return domains;
+    },
   },
   methods: {
     addPrefix(prefix) {
       this.prefixes.push(prefix);
       this.prefix = "";
-      this.generate();
     },
     deletePrefix(prefix) {
       this.prefixes.splice(this.prefixes.indexOf(prefix), 1);
-      this.generate();
     },
     addSuffix(suffix) {
       this.suffixes.push(suffix);
       this.suffix = "";
-      this.generate();
     },
     deleteSuffix(suffix) {
       this.suffixes.splice(this.suffixes.indexOf(suffix), 1);
-      this.generate();
-    },
-    generate() {
-      this.domains = [];
-      for (const prefix of this.prefixes) {
-        for (const suffix of this.suffixes) {
-          this.domains.push(prefix + suffix);
-        }
-      }
     },
   },
 };
