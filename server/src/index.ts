@@ -16,6 +16,7 @@ const typeDefs = `
     name: String
     checkout: String
     available: Boolean
+    extension: String
   }
 
   type Query {
@@ -33,6 +34,7 @@ const typeDefs = `
     deleteItem(id: Int): Boolean
     
     generateDomains: [Domain]
+    generateDomain(name: String): [Domain]
   }
 `;
 
@@ -49,7 +51,6 @@ const isDomainAvailable = (url:string) => {
     return new Promise(resolve => {
         dns.resolve(url, (err) => {
             if (err) {
-                console.log(err)
                 resolve(true)
             }
             resolve(false)
@@ -91,6 +92,23 @@ const resolvers= {
                         available
                     });
                 }
+            }
+            return domains
+        },
+        async generateDomain(_, args) {
+            const name = args.name;
+            const domains = []
+            const extensions = [".com.br", ".com", ".net.br", ".org.org"]
+            for (const extension of extensions) {
+                const url = name.toLowerCase();
+                const checkout = `https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=${extension}`;
+                const available = await isDomainAvailable(`${url}${extension}`)
+                domains.push({
+                    name,
+                    checkout,
+                    available,
+                    extension
+                });
             }
             return domains
         }
