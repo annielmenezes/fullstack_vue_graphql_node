@@ -10,7 +10,7 @@
           <div class="col-md">
             <h5>
               Prefixos
-              <span class="badge badge-info">{{ prefixes.length }}</span>
+              <span class="badge text-bg-info">{{ prefixes.length }}</span>
             </h5>
             <div class="card">
               <div class="card-body">
@@ -18,49 +18,75 @@
                   <li
                     v-for="prefix in prefixes"
                     :key="prefix"
-                    class="list-group-item"
+                    class="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {{ prefix }}
+                    <div>{{ prefix }}</div>
+                    <button class="btn btn-info" @click="deletePrefix(sufix)">
+                      <span class="fa fa-trash"></span>
+                    </button>
                   </li>
                 </ul>
-                <br />
-                <input
-                  class="form-control"
-                  type="text"
-                  placeholder="Digite o prefixo"
-                />
+                <div class="input-group mt-3">
+                  <input
+                    v-model="prefix"
+                    class="form-control"
+                    type="text"
+                    placeholder="Digite o prefixo"
+                    @keyup.enter="addPrefix(prefix)"
+                  />
+                  <button
+                    class="btn btn-info"
+                    type="button"
+                    @click="addPrefix(prefix)"
+                  >
+                    <span class="fa fa-plus"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
           <div class="col-md">
             <h5>
               Sufixos
-              <span class="badge badge-info">{{ suffixes.length }}</span>
+              <span class="badge text-bg-info">{{ suffixes.length }}</span>
             </h5>
             <div class="card">
               <div class="card-body">
                 <ul class="list-group">
                   <li
-                    v-for="sufix in suffixes"
-                    :key="sufix"
-                    class="list-group-item"
+                    v-for="suffix in suffixes"
+                    :key="suffix"
+                    class="list-group-item d-flex justify-content-between align-items-center"
                   >
-                    {{ sufix }}
+                    <div>{{ suffix }}</div>
+                    <button class="btn btn-info" @click="deleteSuffix(suffix)">
+                      <span class="fa fa-trash"></span>
+                    </button>
                   </li>
                 </ul>
-                <br />
-                <input
-                  class="form-control"
-                  type="text"
-                  placeholder="Digite o sufixo"
-                />
+                <div class="input-group mt-3">
+                  <input
+                    v-model="suffix"
+                    class="form-control"
+                    type="text"
+                    placeholder="Digite o sufixo"
+                    @keyup.enter="addSuffix(suffix)"
+                  />
+                  <button
+                    class="btn btn-info"
+                    type="button"
+                    @click="addSuffix(suffix)"
+                  >
+                    <span class="fa fa-plus"></span>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
         <br />
         <h5>
-          Domínios <span class="badge badge-info">{{ domains.length }}</span>
+          Domínios <span class="badge text-bg-info">{{ domains.length }}</span>
         </h5>
         <div class="card">
           <div class="card-body">
@@ -88,20 +114,43 @@ export default {
   name: "App",
   data: function () {
     return {
+      prefix: "",
       prefixes: ["Air", "Jet", "Flight"],
+      suffix: "",
       suffixes: ["Hub", "Station", "Mart"],
-      domains: [
-        "AirHub",
-        "AirStation",
-        "AirMart",
-        "JetHub",
-        "JetStation",
-        "JetMart",
-        "FlightHub",
-        "FlightStation",
-        "FlightMart",
-      ],
+      domains: [],
     };
+  },
+  beforeMount() {
+    this.generate();
+  },
+  methods: {
+    addPrefix(prefix) {
+      this.prefixes.push(prefix);
+      this.prefix = "";
+      this.generate();
+    },
+    deletePrefix(prefix) {
+      this.prefixes.splice(this.prefixes.indexOf(prefix), 1);
+      this.generate();
+    },
+    addSuffix(suffix) {
+      this.suffixes.push(suffix);
+      this.suffix = "";
+      this.generate();
+    },
+    deleteSuffix(suffix) {
+      this.suffixes.splice(this.suffixes.indexOf(suffix), 1);
+      this.generate();
+    },
+    generate() {
+      this.domains = [];
+      for (const prefix of this.prefixes) {
+        for (const suffix of this.suffixes) {
+          this.domains.push(prefix + suffix);
+        }
+      }
+    },
   },
 };
 </script>
