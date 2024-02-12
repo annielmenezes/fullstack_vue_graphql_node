@@ -8,12 +8,11 @@ const typeDefs = `#graphql
   type Item {
     id: Int
     type: String
-    description: String
+    description: String!
   }
 
   type Query {
-    prefixes: [Item]
-    suffixes: [Item]
+    items(type: String): [Item]
   }
 `;
 
@@ -28,12 +27,10 @@ const items = [
 
 const resolvers= {
     Query: {
-        prefixes() {
-            return items.filter(item => item.type === 'prefix')
+        items(_, args) {
+            console.log(args)
+            return items.filter(item => item.type === args.type)
         },
-        suffixes() {
-            return items.filter(item => item.type === 'suffix')
-        }
     }
 }
 
