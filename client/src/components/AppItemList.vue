@@ -8,12 +8,12 @@
       <div class="card-body">
         <ul class="list-group">
           <li
-            v-for="item in items"
-            :key="item"
+            v-for="i in items"
+            :key="i"
             class="list-group-item d-flex justify-content-between align-items-center"
           >
-            <div>{{ item }}</div>
-            <button class="btn btn-info" @click="deleteItem(item)">
+            <div>{{ i }}</div>
+            <button class="btn btn-info" @click="deleteItem(i)">
               <span class="fa fa-trash"></span>
             </button>
           </li>
@@ -38,7 +38,17 @@
 <script>
 export default {
   name: "AppItemList",
-  props: ["title", "items"],
+  props: {
+    title: {
+      type: String,
+      default: "",
+    },
+    items: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ["addItem", "deleteItem"],
   data() {
     return {
       item: "",
