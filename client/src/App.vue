@@ -5,7 +5,7 @@
       <h6 class="text-secondary">Gerador de nomes Vue.js, GraphQL e Node</h6>
     </header>
     <main id="main">
-      <DomainList />
+      <router-view />
     </main>
   </div>
 </template>
@@ -13,13 +13,9 @@
 <script>
 import "bootstrap/dist/css/bootstrap.min.css";
 import "font-awesome/css/font-awesome.min.css";
-import DomainList from "@/components/DomainList.vue";
 
 export default {
   name: "App",
-  components: {
-    DomainList,
-  },
 };
 </script>
 

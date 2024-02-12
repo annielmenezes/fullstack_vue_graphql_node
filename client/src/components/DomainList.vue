@@ -45,10 +45,15 @@
                   {{ domain.available ? "Disponível" : "Indisponível" }}
                 </span>
               </div>
-
-              <a class="btn btn-info" :href="domain.checkout" target="_blank">
-                <i class="fa fa-shopping-cart"></i>
-              </a>
+              <div>
+                <a class="btn btn-info" :href="domain.checkout" target="_blank">
+                  <i class="fa fa-shopping-cart"></i>
+                </a>
+                &nbsp;
+                <a class="btn btn-info" @click="openDomain(domain)">
+                  <i class="fa fa-search"></i>
+                </a>
+              </div>
             </li>
           </ul>
         </div>
@@ -168,6 +173,11 @@ export default {
         const list = this.items[item.type];
         list.splice(list.indexOf(item), 1);
         this.generateDomains();
+      });
+    },
+    openDomain(domain) {
+      this.$router?.push({
+        path: `/domains/${domain.name}`,
       });
     },
   },
