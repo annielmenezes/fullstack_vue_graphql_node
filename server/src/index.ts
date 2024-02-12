@@ -1,14 +1,21 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import * as dns from "dns";
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
 // your data.
-const typeDefs = `#graphql
+const typeDefs = `
   type Item {
     id: Int
     type: String
     description: String
+  }
+  
+  type Domain {
+    name: String
+    checkout: String
+    available: Boolean
   }
 
   type Query {
@@ -24,6 +31,8 @@ const typeDefs = `#graphql
     saveItem(item: ItemInput): Item
     
     deleteItem(id: Int): Boolean
+    
+    generateDomains: [Domain]
   }
 `;
 
@@ -35,6 +44,18 @@ const items = [
     { id: 5, type: "suffix", description: "Station" },
     { id: 6, type: "suffix", description: "Mart" }
 ]
+
+const isDomainAvailable = (url:string) => {
+    return new Promise(resolve => {
+        dns.resolve(url, (err) => {
+            if (err) {
+                console.log(err)
+                resolve(true)
+            }
+            resolve(false)
+        })
+    })
+}
 
 const resolvers= {
     Query: {
@@ -55,6 +76,23 @@ const resolvers= {
             if (!item) return false
             items.splice(items.indexOf(item), 1)
             return true
+        },
+        async generateDomains() {
+            const domains = [];
+            for (const prefix of items.filter(item => item.type === "prefix")) {
+                for (const suffix of items.filter(item => item.type === "suffix")) {
+                    const name = prefix.description + suffix.description;
+                    const url = name.toLowerCase();
+                    const checkout = `https://checkout.hostgator.com.br/?a=add&sld=${url}&tld=.com.br`;
+                    const available = await isDomainAvailable(`${url}.com.br`)
+                    domains.push({
+                        name,
+                        checkout,
+                        available
+                    });
+                }
+            }
+            return domains
         }
     }
 }
