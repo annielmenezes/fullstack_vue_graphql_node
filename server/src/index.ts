@@ -1,6 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import * as dns from "dns";
+import {deleteItem, getItems, getItemsByType, saveItem} from "./service.js";
 
 // A schema is a collection of type definitions (hence "typeDefs")
 // that together define the "shape" of queries that are executed against
@@ -38,15 +39,6 @@ const typeDefs = `
   }
 `;
 
-const items = [
-    { id: 1, type: "prefix", description: "Air" },
-    { id: 2, type: "prefix", description: "Jet" },
-    { id: 3, type: "prefix", description: "Flight" },
-    { id: 4, type: "suffix", description: "Hub" },
-    { id: 5, type: "suffix", description: "Station" },
-    { id: 6, type: "suffix", description: "Mart" }
-]
-
 const isDomainAvailable = (url:string) => {
     return new Promise(resolve => {
         dns.resolve(url, (err) => {
@@ -58,28 +50,29 @@ const isDomainAvailable = (url:string) => {
     })
 }
 
+const items = []
+
 const resolvers= {
     Query: {
-        items(_, args) {
-            return items.filter(item => item.type === args.type)
+        async items(_, args) {
+            const items = await getItemsByType(args.type)
+            return items
         },
     },
     Mutation: {
-        saveItem(_, args) {
+        async saveItem(_, args) {
             const {item} = args;
-            item.id = Math.floor(Math.random() * 1000);
-            items.push(item)
-            return item
+            const [newItem] = await saveItem(item)
+            return newItem
         },
-        deleteItem(_, args) {
+        async deleteItem(_, args) {
             const {id} = args;
-            const item = items.find(item => item.id === id);
-            if (!item) return false
-            items.splice(items.indexOf(item), 1)
+           await deleteItem(id)
             return true
         },
         async generateDomains() {
             const domains = [];
+            const items = await getItems()
             for (const prefix of items.filter(item => item.type === "prefix")) {
                 for (const suffix of items.filter(item => item.type === "suffix")) {
                     const name = prefix.description + suffix.description;
