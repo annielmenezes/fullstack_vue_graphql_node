@@ -9,27 +9,23 @@
           <div class="card-body">
             <ul class="list-group">
               <li
-                v-for="domain in domains"
-                :key="domain.extension"
+                v-for="uri in domains"
+                :key="uri.extension"
                 class="list-group-item d-flex justify-content-between align-items-center"
               >
                 <div class="position-relative">
-                  {{ domain.extension }}
+                  {{ uri.extension }}
                   <span
                     class="badge rounded"
                     :class="
-                      domain.available ? 'text-bg-success' : 'text-bg-danger'
+                      uri.available ? 'text-bg-success' : 'text-bg-danger'
                     "
                   >
-                    {{ domain.available ? "Disponível" : "Indisponível" }}
+                    {{ uri.available ? "Disponível" : "Indisponível" }}
                   </span>
                 </div>
                 <div>
-                  <a
-                    class="btn btn-info"
-                    :href="domain.checkout"
-                    target="_blank"
-                  >
+                  <a class="btn btn-info" :href="uri.checkout" target="_blank">
                     <i class="fa fa-shopping-cart"></i>
                   </a>
                 </div>
