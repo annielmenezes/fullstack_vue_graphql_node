@@ -63,7 +63,7 @@
 </template>
 
 <script>
-import axios from "axios";
+import { mapState, mapActions } from "vuex";
 import AppItemList from "@/components/AppItemList.vue";
 
 export default {
@@ -72,109 +72,13 @@ export default {
     AppItemList,
   },
   data() {
-    return {
-      items: {
-        prefix: [],
-        suffix: [],
-      },
-      domains: [],
-    };
+    return {};
   },
-  computed: {},
-  created() {
-    Promise.all([this.getItems("prefix"), this.getItems("suffix")]).then(() => {
-      this.generateDomains();
-    });
+  computed: {
+    ...mapState(["domains", "items"]),
   },
   methods: {
-    generateDomains() {
-      console.log("Generating domains...");
-      axios({
-        url: "http://localhost:4000",
-        method: "post",
-        data: {
-          query: `
-          mutation {
-            domains: generateDomains {
-              name
-              checkout
-              available
-            }
-          }
-        `,
-        },
-      }).then((response) => {
-        const query = response.data;
-        const { domains } = query.data;
-        this.domains = domains;
-      });
-    },
-    getItems(type) {
-      return axios({
-        url: "http://localhost:4000",
-        method: "post",
-        data: {
-          query: ` query ($type: String){
-           items (type: $type) {
-            id
-            type
-            description
-          }
-        }`,
-          variables: {
-            type,
-          },
-        },
-      }).then((response) => {
-        const query = response.data;
-        this.items[type] = query.data.items;
-      });
-    },
-    addItem(item) {
-      axios({
-        url: "http://localhost:4000",
-        method: "post",
-        data: {
-          query: `
-          mutation ($item: ItemInput) {
-            saveItem(item: $item) {
-              id
-              type
-              description
-            }
-          }
-        `,
-          variables: {
-            item,
-          },
-        },
-      }).then((response) => {
-        const query = response.data;
-        const { saveItem } = query.data;
-        this.items[saveItem.type].push(saveItem);
-        this.generateDomains();
-      });
-    },
-    deleteItem(item) {
-      axios({
-        url: "http://localhost:4000",
-        method: "post",
-        data: {
-          query: `
-          mutation ($id: Int) {
-            deleted: deleteItem(id: $id)
-          }
-        `,
-          variables: {
-            id: item.id,
-          },
-        },
-      }).then(() => {
-        const list = this.items[item.type];
-        list.splice(list.indexOf(item), 1);
-        this.generateDomains();
-      });
-    },
+    ...mapActions(["addItem", "deleteItem", "getItems", "generateDomains"]),
     openDomain(domain) {
       this.$router?.push({
         path: `/domains/${domain.name}`,
